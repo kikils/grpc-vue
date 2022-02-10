@@ -1,0 +1,30 @@
+version: "3"
+services:
+  proxy:
+    build: ./proxy
+    ports:
+      - "9000:9000"
+    stdin_open: true
+    tty: true
+    depends_on:
+      - backend
+
+  backend:
+    build: ./backend
+    ports:
+      - "9999:9999"
+    stdin_open: true
+    tty: true
+    volumes:
+      - ./backend:/go/src/github.com/kikils/backend
+
+  frontend:
+    build: ./frontend
+    ports:
+      - "8080:8080"
+    stdin_open: true
+    tty: true
+    volumes:
+      - ./frontend:/frontend
+    depends_on:
+      - proxy
