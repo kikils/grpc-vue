@@ -17,5 +17,6 @@ RUN ln -s /protoc/bin/protoc /bin/protoc
 WORKDIR /go/src/github.com/kikils/backend
 COPY . .
 RUN go get -u github.com/pilu/fresh
-RUN go get -u github.com/golang/protobuf/protoc-gen-go
+RUN go get -u google.golang.org/protobuf/cmd/protoc-gen-go@v1.26
+RUN go get -u google.golang.org/grpc/cmd/protoc-gen-go-grpc@v1.1
 CMD ["fresh"]
