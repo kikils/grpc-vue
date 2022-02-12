@@ -1,17 +1,56 @@
 <template>
-  <div id="app">
-    <img alt="Vue logo" src="./assets/logo.png">
-    <HelloWorld msg="Welcome to Your Vue.js App"/>
+  <div id='app'>
+    <section>
+      <span class='title-text'>gRPC Client</span>
+      <div class='row justify-content-center mt-4'>
+        <input v-model='inputField' v-on:keyup.enter='addNum' class='mr-1' placeholder='Please input Number'>
+        <button @click='addNum' class='btn btn-primary'>Add Num</button>
+      </div>
+    </section>
+    <section>
+      <h2>now total: {{num.total}}</h2>
+    </section>
   </div>
 </template>
 
 <script>
-import HelloWorld from './components/HelloWorld.vue'
+import { addNumParams, getTotalNumParams } from './count_pb'
+import { addNumServiceClient } from './count_grpc_web_pb'
 
 export default {
   name: 'App',
-  components: {
-    HelloWorld
+  components: {},
+  data: function () {
+    return {
+      inputField: '',
+      num: 0
+    }
+  },
+  created: function () {
+    // eslint-disable-next-line
+    this.client = new addNumServiceClient('http://0.0.0.0:9000', null, null)
+    this.getTotalNum()
+  },
+  methods: {
+    getTotalNum: function () {
+      // eslint-disable-next-line
+      let getRequest = new getTotalNumParams()
+      // eslint-disable-next-line
+      this.client.getTotalNum(getRequest, {}, (err, response) => {
+        this.num = response.toObject()
+        console.log(err, response)
+      })
+    },
+    addNum: function () {
+      // eslint-disable-next-line
+      let request = new addNumParams()
+      request.setNumber(Number(this.inputField))
+      // eslint-disable-next-line
+      this.client.addNum(request, {}, (err, response) => {
+        this.inputField = ''
+        this.num = response.toObject()
+      })
+    }
   }
 }
 </script>
