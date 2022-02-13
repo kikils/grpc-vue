@@ -17,7 +17,7 @@ func main() {
 		log.Fatalf("failed to listen: %v", err)
 	}
 
-	s := proto.Server{}
+	s := proto.Server{Rooms: []proto.Room{}}
 	grpcServer := grpc.NewServer()
 	// serverにserviceを追加
 	proto.RegisterAddNumServiceServer(grpcServer, &s)

@@ -2,17 +2,54 @@ syntax = "proto3";
 package proto;
 option go_package = "./";
 
-message getTotalNumParams{}
-
-message addNumParams {
-    int32 number = 1;
-}
+message Null {}
 
 message totalNum {
-    int32 total = 1;
+    string userId = 1;
+    string roomId = 2;
+    int32 total = 3;
+}
+
+message countNumparams {
+    string userId = 1;
+    string roomId = 2;
+}
+
+message getRoomTotalNumParams {
+    string roomId = 1;
+}
+
+message roomTotalNums {
+    string roomId = 1;
+    repeated totalNum totalNums = 2;
+}
+
+message addRoomParams {
+    string roomId = 1;
+}
+
+message roomInfo {
+    string roomId = 1;
+    bool isActive = 2;
+}
+
+message roomList {
+    repeated roomInfo rooms = 1;
+}
+
+message joinRoomParams {
+    string userId = 1;
+    string roomId = 2;
+}
+
+message joinResult {
+    bool isSuccess = 1;
 }
 
 service addNumService {
-    rpc addNum(addNumParams) returns (totalNum) {}
-    rpc getTotalNum(getTotalNumParams) returns (totalNum) {}
+    rpc countNum(countNumparams) returns (totalNum) {}
+    rpc getRoomTotalNum(getRoomTotalNumParams) returns (stream roomTotalNums) {}
+    rpc addRoom(addRoomParams) returns (roomInfo) {}
+    rpc joinRoom(joinRoomParams) returns (joinResult) {}
+    rpc getRooms(Null) returns (roomList) {}
 }

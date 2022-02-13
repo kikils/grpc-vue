@@ -18,8 +18,11 @@ const _ = grpc.SupportPackageIsVersion7
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type AddNumServiceClient interface {
-	AddNum(ctx context.Context, in *AddNumParams, opts ...grpc.CallOption) (*TotalNum, error)
-	GetTotalNum(ctx context.Context, in *GetTotalNumParams, opts ...grpc.CallOption) (*TotalNum, error)
+	CountNum(ctx context.Context, in *CountNumparams, opts ...grpc.CallOption) (*TotalNum, error)
+	GetRoomTotalNum(ctx context.Context, in *GetRoomTotalNumParams, opts ...grpc.CallOption) (AddNumService_GetRoomTotalNumClient, error)
+	AddRoom(ctx context.Context, in *AddRoomParams, opts ...grpc.CallOption) (*RoomInfo, error)
+	JoinRoom(ctx context.Context, in *JoinRoomParams, opts ...grpc.CallOption) (*JoinResult, error)
+	GetRooms(ctx context.Context, in *Null, opts ...grpc.CallOption) (*RoomList, error)
 }
 
 type addNumServiceClient struct {
@@ -30,18 +33,68 @@ func NewAddNumServiceClient(cc grpc.ClientConnInterface) AddNumServiceClient {
 	return &addNumServiceClient{cc}
 }
 
-func (c *addNumServiceClient) AddNum(ctx context.Context, in *AddNumParams, opts ...grpc.CallOption) (*TotalNum, error) {
+func (c *addNumServiceClient) CountNum(ctx context.Context, in *CountNumparams, opts ...grpc.CallOption) (*TotalNum, error) {
 	out := new(TotalNum)
-	err := c.cc.Invoke(ctx, "/proto.addNumService/addNum", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/proto.addNumService/countNum", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *addNumServiceClient) GetTotalNum(ctx context.Context, in *GetTotalNumParams, opts ...grpc.CallOption) (*TotalNum, error) {
-	out := new(TotalNum)
-	err := c.cc.Invoke(ctx, "/proto.addNumService/getTotalNum", in, out, opts...)
+func (c *addNumServiceClient) GetRoomTotalNum(ctx context.Context, in *GetRoomTotalNumParams, opts ...grpc.CallOption) (AddNumService_GetRoomTotalNumClient, error) {
+	stream, err := c.cc.NewStream(ctx, &AddNumService_ServiceDesc.Streams[0], "/proto.addNumService/getRoomTotalNum", opts...)
+	if err != nil {
+		return nil, err
+	}
+	x := &addNumServiceGetRoomTotalNumClient{stream}
+	if err := x.ClientStream.SendMsg(in); err != nil {
+		return nil, err
+	}
+	if err := x.ClientStream.CloseSend(); err != nil {
+		return nil, err
+	}
+	return x, nil
+}
+
+type AddNumService_GetRoomTotalNumClient interface {
+	Recv() (*RoomTotalNums, error)
+	grpc.ClientStream
+}
+
+type addNumServiceGetRoomTotalNumClient struct {
+	grpc.ClientStream
+}
+
+func (x *addNumServiceGetRoomTotalNumClient) Recv() (*RoomTotalNums, error) {
+	m := new(RoomTotalNums)
+	if err := x.ClientStream.RecvMsg(m); err != nil {
+		return nil, err
+	}
+	return m, nil
+}
+
+func (c *addNumServiceClient) AddRoom(ctx context.Context, in *AddRoomParams, opts ...grpc.CallOption) (*RoomInfo, error) {
+	out := new(RoomInfo)
+	err := c.cc.Invoke(ctx, "/proto.addNumService/addRoom", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *addNumServiceClient) JoinRoom(ctx context.Context, in *JoinRoomParams, opts ...grpc.CallOption) (*JoinResult, error) {
+	out := new(JoinResult)
+	err := c.cc.Invoke(ctx, "/proto.addNumService/joinRoom", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *addNumServiceClient) GetRooms(ctx context.Context, in *Null, opts ...grpc.CallOption) (*RoomList, error) {
+	out := new(RoomList)
+	err := c.cc.Invoke(ctx, "/proto.addNumService/getRooms", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -52,19 +105,31 @@ func (c *addNumServiceClient) GetTotalNum(ctx context.Context, in *GetTotalNumPa
 // All implementations should embed UnimplementedAddNumServiceServer
 // for forward compatibility
 type AddNumServiceServer interface {
-	AddNum(context.Context, *AddNumParams) (*TotalNum, error)
-	GetTotalNum(context.Context, *GetTotalNumParams) (*TotalNum, error)
+	CountNum(context.Context, *CountNumparams) (*TotalNum, error)
+	GetRoomTotalNum(*GetRoomTotalNumParams, AddNumService_GetRoomTotalNumServer) error
+	AddRoom(context.Context, *AddRoomParams) (*RoomInfo, error)
+	JoinRoom(context.Context, *JoinRoomParams) (*JoinResult, error)
+	GetRooms(context.Context, *Null) (*RoomList, error)
 }
 
 // UnimplementedAddNumServiceServer should be embedded to have forward compatible implementations.
 type UnimplementedAddNumServiceServer struct {
 }
 
-func (UnimplementedAddNumServiceServer) AddNum(context.Context, *AddNumParams) (*TotalNum, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method AddNum not implemented")
+func (UnimplementedAddNumServiceServer) CountNum(context.Context, *CountNumparams) (*TotalNum, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CountNum not implemented")
 }
-func (UnimplementedAddNumServiceServer) GetTotalNum(context.Context, *GetTotalNumParams) (*TotalNum, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetTotalNum not implemented")
+func (UnimplementedAddNumServiceServer) GetRoomTotalNum(*GetRoomTotalNumParams, AddNumService_GetRoomTotalNumServer) error {
+	return status.Errorf(codes.Unimplemented, "method GetRoomTotalNum not implemented")
+}
+func (UnimplementedAddNumServiceServer) AddRoom(context.Context, *AddRoomParams) (*RoomInfo, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method AddRoom not implemented")
+}
+func (UnimplementedAddNumServiceServer) JoinRoom(context.Context, *JoinRoomParams) (*JoinResult, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method JoinRoom not implemented")
+}
+func (UnimplementedAddNumServiceServer) GetRooms(context.Context, *Null) (*RoomList, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetRooms not implemented")
 }
 
 // UnsafeAddNumServiceServer may be embedded to opt out of forward compatibility for this service.
@@ -78,38 +143,95 @@ func RegisterAddNumServiceServer(s grpc.ServiceRegistrar, srv AddNumServiceServe
 	s.RegisterService(&AddNumService_ServiceDesc, srv)
 }
 
-func _AddNumService_AddNum_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(AddNumParams)
+func _AddNumService_CountNum_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CountNumparams)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(AddNumServiceServer).AddNum(ctx, in)
+		return srv.(AddNumServiceServer).CountNum(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/proto.addNumService/addNum",
+		FullMethod: "/proto.addNumService/countNum",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(AddNumServiceServer).AddNum(ctx, req.(*AddNumParams))
+		return srv.(AddNumServiceServer).CountNum(ctx, req.(*CountNumparams))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _AddNumService_GetTotalNum_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(GetTotalNumParams)
+func _AddNumService_GetRoomTotalNum_Handler(srv interface{}, stream grpc.ServerStream) error {
+	m := new(GetRoomTotalNumParams)
+	if err := stream.RecvMsg(m); err != nil {
+		return err
+	}
+	return srv.(AddNumServiceServer).GetRoomTotalNum(m, &addNumServiceGetRoomTotalNumServer{stream})
+}
+
+type AddNumService_GetRoomTotalNumServer interface {
+	Send(*RoomTotalNums) error
+	grpc.ServerStream
+}
+
+type addNumServiceGetRoomTotalNumServer struct {
+	grpc.ServerStream
+}
+
+func (x *addNumServiceGetRoomTotalNumServer) Send(m *RoomTotalNums) error {
+	return x.ServerStream.SendMsg(m)
+}
+
+func _AddNumService_AddRoom_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(AddRoomParams)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(AddNumServiceServer).GetTotalNum(ctx, in)
+		return srv.(AddNumServiceServer).AddRoom(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/proto.addNumService/getTotalNum",
+		FullMethod: "/proto.addNumService/addRoom",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(AddNumServiceServer).GetTotalNum(ctx, req.(*GetTotalNumParams))
+		return srv.(AddNumServiceServer).AddRoom(ctx, req.(*AddRoomParams))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _AddNumService_JoinRoom_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(JoinRoomParams)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AddNumServiceServer).JoinRoom(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/proto.addNumService/joinRoom",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AddNumServiceServer).JoinRoom(ctx, req.(*JoinRoomParams))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _AddNumService_GetRooms_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(Null)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AddNumServiceServer).GetRooms(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/proto.addNumService/getRooms",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AddNumServiceServer).GetRooms(ctx, req.(*Null))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -122,14 +244,28 @@ var AddNumService_ServiceDesc = grpc.ServiceDesc{
 	HandlerType: (*AddNumServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
-			MethodName: "addNum",
-			Handler:    _AddNumService_AddNum_Handler,
+			MethodName: "countNum",
+			Handler:    _AddNumService_CountNum_Handler,
 		},
 		{
-			MethodName: "getTotalNum",
-			Handler:    _AddNumService_GetTotalNum_Handler,
+			MethodName: "addRoom",
+			Handler:    _AddNumService_AddRoom_Handler,
+		},
+		{
+			MethodName: "joinRoom",
+			Handler:    _AddNumService_JoinRoom_Handler,
+		},
+		{
+			MethodName: "getRooms",
+			Handler:    _AddNumService_GetRooms_Handler,
 		},
 	},
-	Streams:  []grpc.StreamDesc{},
+	Streams: []grpc.StreamDesc{
+		{
+			StreamName:    "getRoomTotalNum",
+			Handler:       _AddNumService_GetRoomTotalNum_Handler,
+			ServerStreams: true,
+		},
+	},
 	Metadata: "count.proto",
 }
