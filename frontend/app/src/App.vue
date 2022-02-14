@@ -46,7 +46,7 @@ export default {
   },
   created: function () {
     // eslint-disable-next-line
-    this.client = new addNumServiceClient('http://0.0.0.0:9000', null, null)
+    this.client = new addNumServiceClient(`${location.protocol}//${location.hostname}:9000`, null, null)
   },
   watch: {
     start: function(nv) {
